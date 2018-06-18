@@ -1,0 +1,63 @@
+---
+- hosts: all
+  become: True
+  tasks:
+    - name: Install Java-1.8.0 on Linux
+      yum:
+        name: java-1.8.0-openjdk-devel
+        state: present
+    - name: Correcting java version
+      alternatives:
+        name: java
+        path: /usr/lib/jvm/jre-1.8.0-openjdk.x86_64/bin/java
+    - name: Correcting javac version
+      alternatives:
+        name: javac
+        path: /usr/lib/jvm/java-1.8.0-openjdk.x86_64/bin/javac
+
+    - name: add group "tomcat"
+      group: 
+        name: tomcat
+
+    - name: add user "tomcat"
+      user: 
+        name: tomcat
+        group: tomcat
+        home: /usr/share/tomcat
+        createhome: no
+
+    - name: Download Tomcat
+      get_url:
+        url: http://redrockdigimark.com/apachemirror/tomcat/tomcat-8/v8.5.31/bin/apache-tomcat-8.5.31.tar.gz
+        dest: /opt/apache-tomcat-8.5.31.tar.gz
+
+    - name: Extract archive
+      command: chdir=/usr/share /bin/tar xvf /opt/apache-tomcat-8.5.31.tar.gz -C /opt/ creates=/opt/apache-tomcat-8.5.31
+    - name: Symlink install directory
+      file: src=/opt/apache-tomcat-8.5.31 path=/usr/share/tomcat state=link
+
+    - name: Change ownership of Tomcat installation
+      file: path=/usr/share/tomcat/ owner=tomcat group=tomcat state=directory recurse=yes
+
+    - name: Install Tomcat init script
+      copy: src=./tomcat.sh dest=/etc/init.d/tomcat mode=0755
+    - name: Configure Tomcat users
+      copy: 
+        src: ./tomcat-users.xml
+        dest: /usr/share/tomcat/conf/
+      notify: restart tomcat
+    - name: Remove Restrictions
+      copy:
+        src: ./context.xml
+        dest: /usr/share/tomcat/webapps/manager/META-INF
+      notify: restart tomcat
+    - name: Start Tomcat
+      service: name=tomcat state=started enabled=yes
+      notify: restart tomcat
+
+  handlers:
+    - name: restart tomcat
+      service: 
+        name: tomcat
+        state: restarted
+

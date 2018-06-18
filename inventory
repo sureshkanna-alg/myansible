@@ -1,1 +1,2 @@
-web01 ansible_host=52.11.175.239 ansible_user=ec2-user
+172.31.31.32 ansible_user=ec2-user ansible_ssh_private_key_file=./ec2key.pem
+
