@@ -1,0 +1,16 @@
+---
+- hosts: all
+  become: True
+  tasks:
+    - name: Install Java on Linux
+      yum:
+        name: java-1.8.0-openjdk-devel
+        state: present
+    - name: correct java version selected
+      alternatives:
+        name: java
+        path: /usr/lib/jvm/jre-1.8.0-openjdk.x86_64/bin/java
+    - name: correct java version selected
+      alternatives:
+        name: javac
+        path: /usr/lib/jvm/java-1.8.0-openjdk.x86_64/bin/javac

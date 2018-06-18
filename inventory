@@ -1,0 +1,1 @@
+web01 ansible_host=52.11.175.239 ansible_user=ec2-user
