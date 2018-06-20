@@ -16,11 +16,11 @@
         path: /usr/lib/jvm/java-1.8.0-openjdk.x86_64/bin/javac
 
     - name: add group "tomcat"
-      group: 
+      group:
         name: tomcat
 
     - name: add user "tomcat"
-      user: 
+      user:
         name: tomcat
         group: tomcat
         home: /usr/share/tomcat
@@ -42,7 +42,7 @@
     - name: Install Tomcat init script
       copy: src=./tomcat.sh dest=/etc/init.d/tomcat mode=0755
     - name: Configure Tomcat users
-      copy: 
+      copy:
         src: ./tomcat-users.xml
         dest: /usr/share/tomcat/conf/
       notify: restart tomcat
@@ -54,10 +54,14 @@
     - name: Start Tomcat
       service: name=tomcat state=started enabled=yes
       notify: restart tomcat
+    - name: Copy Warfile
+      copy:
+        src: /home/ec2-user/shipwrick/target/shipwreck-0.0.2.war
+        dest: /usr/share/tomcat/webapps/shipwreck.war
+      notify: restart tomcat
 
   handlers:
     - name: restart tomcat
-      service: 
+      service:
         name: tomcat
         state: restarted
-
